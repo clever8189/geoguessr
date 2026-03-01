@@ -17,7 +17,7 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); h
 .screen { position:absolute; inset:0; display:none; }
 .screen.active { display:flex; }
 
-/* INTRO */
+/* ══ INTRO ══ */
 #intro { flex-direction:column; align-items:center; justify-content:center; background:var(--bg); }
 .intro-eyebrow { font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem; }
 .intro-title { font-family:'Unbounded',sans-serif; font-size:clamp(2.8rem,7vw,5.5rem); font-weight:600; letter-spacing:-.02em; line-height:1; color:var(--ink); text-align:center; }
@@ -30,32 +30,96 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); h
 .btn { background:var(--ink); color:var(--white); border:none; padding:.9rem 2.8rem; font-family:'Unbounded',sans-serif; font-size:.75rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .15s; }
 .btn:hover { background:var(--accent); transform:translateY(-1px); }
 
-/* GAME */
-#game { flex-direction:column; }
-.topbar { height:48px; min-height:48px; background:var(--white); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1.5rem; gap:1.5rem; z-index:10; }
-.topbar-logo { font-family:'Unbounded',sans-serif; font-size:.8rem; font-weight:600; color:var(--ink); }
-.topbar-logo span { color:var(--accent); }
-.topbar-round { font-size:.72rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
-.topbar-score { margin-left:auto; font-family:'Unbounded',sans-serif; font-size:.85rem; font-weight:600; color:var(--ink); }
-.topbar-score span { font-weight:300; font-size:.7rem; color:var(--muted); margin-right:.3rem; }
-.game-body { flex:1; display:flex; min-height:0; }
-#panorama { flex:1; position:relative; }
-#sidebar { width:300px; min-width:300px; background:var(--white); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:1.25rem; gap:1rem; }
-.sidebar-hint { font-size:.78rem; color:var(--muted); line-height:1.55; padding-bottom:1rem; border-bottom:1px solid var(--border); }
-#map-wrap { flex:1; border:1px solid var(--border); overflow:hidden; min-height:0; }
-#map { width:100%; height:100%; }
-.guess-btn { background:var(--border); color:var(--muted); border:none; padding:.8rem; font-family:'Unbounded',sans-serif; font-size:.7rem; font-weight:300; letter-spacing:.1em; text-transform:uppercase; cursor:not-allowed; transition:background .2s,color .2s,transform .15s; }
-.guess-btn.ready { background:var(--ink); color:var(--white); cursor:pointer; }
-.guess-btn.ready:hover { background:var(--accent); transform:translateY(-1px); }
+/* ══ GAME ══ */
+#game { position:relative; }
 
-#pano-loading { position:absolute; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:20; transition:opacity .3s; }
+/* Полупрозрачный топбар поверх панорамы */
+.topbar {
+  position:absolute; top:0; left:0; right:0; height:52px;
+  background:linear-gradient(to bottom, rgba(10,10,8,.75) 0%, transparent 100%);
+  display:flex; align-items:center; padding:0 1.5rem; gap:1.5rem;
+  z-index:100; pointer-events:none;
+}
+.topbar-logo { font-family:'Unbounded',sans-serif; font-size:.8rem; font-weight:600; color:#fff; pointer-events:all; }
+.topbar-logo span { color:var(--accent); }
+.topbar-round { font-size:.7rem; color:rgba(255,255,255,.55); letter-spacing:.1em; text-transform:uppercase; }
+.topbar-score { margin-left:auto; font-family:'Unbounded',sans-serif; font-size:.85rem; font-weight:600; color:#fff; }
+.topbar-score .lbl { font-weight:300; font-size:.65rem; color:rgba(255,255,255,.5); margin-right:.3rem; }
+
+/* Панорама — весь экран */
+#panorama { position:absolute; inset:0; z-index:1; }
+
+/* loading */
+#pano-loading {
+  position:absolute; inset:0; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem;
+  z-index:50; transition:opacity .3s;
+}
 .loading-dots { display:flex; gap:6px; }
 .loading-dot { width:6px; height:6px; background:var(--ink); border-radius:50%; display:inline-block; animation:pulse 1.2s ease-in-out infinite; }
 .loading-dot:nth-child(2){animation-delay:.2s} .loading-dot:nth-child(3){animation-delay:.4s}
 @keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
 .loading-label { font-size:.72rem; color:var(--muted); letter-spacing:.15em; text-transform:uppercase; }
 
-/* RESULT */
+/* ══ ПЛАВАЮЩАЯ КАРТА ══ */
+#map-float {
+  position:absolute;
+  bottom:80px;   /* место для кнопки снизу */
+  right:20px;
+  z-index:200;
+
+  width:240px;
+  height:170px;
+
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 6px 28px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.12);
+  transition:width .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1), box-shadow .28s;
+  cursor:crosshair;
+}
+#map-float:hover {
+  width:400px;
+  height:280px;
+  box-shadow:0 12px 48px rgba(0,0,0,.65), 0 0 0 2px rgba(255,255,255,.18);
+}
+#map { width:100%; height:100%; }
+
+/* Кнопка подтвердить — под картой */
+#guess-btn {
+  position:absolute;
+  bottom:20px; right:20px;
+  z-index:200;
+  width:240px;   /* совпадает с шириной карты */
+  background:rgba(26,26,24,.88);
+  backdrop-filter:blur(6px);
+  color:rgba(255,255,255,.35);
+  border:1px solid rgba(255,255,255,.12);
+  padding:.7rem 1rem;
+  font-family:'Unbounded',sans-serif;
+  font-size:.68rem; font-weight:300;
+  letter-spacing:.1em; text-transform:uppercase;
+  cursor:not-allowed;
+  transition:background .2s, color .2s, border-color .2s, transform .15s, width .28s cubic-bezier(.4,0,.2,1);
+  border-radius:4px;
+  text-align:center;
+}
+#guess-btn.ready {
+  color:#fff;
+  border-color:rgba(255,255,255,.3);
+  cursor:pointer;
+}
+#guess-btn.ready:hover {
+  background:var(--accent);
+  border-color:var(--accent);
+  transform:translateY(-1px);
+}
+
+/* Когда карта расширилась — кнопка тоже расширяется */
+#map-float:hover ~ #guess-btn {
+  width:400px;
+}
+
+/* ══ RESULT ══ */
 #result { flex-direction:column; }
 .result-topbar { height:48px; min-height:48px; background:var(--white); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1.5rem; gap:1rem; }
 .result-topbar .rt-label { font-family:'Unbounded',sans-serif; font-size:.75rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
@@ -63,7 +127,7 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); h
 .result-body { flex:1; display:flex; min-height:0; }
 #result-map-wrap { flex:1; }
 #result-map { width:100%; height:100%; }
-#result-panel { width:300px; min-width:300px; background:var(--white); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:1.5rem; gap:1.5rem; }
+#result-panel { width:280px; min-width:280px; background:var(--white); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:1.5rem; gap:1.5rem; }
 .rp-row { display:flex; flex-direction:column; gap:.3rem; }
 .rp-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.2em; color:var(--muted); }
 .rp-val { font-family:'Unbounded',sans-serif; font-size:2rem; font-weight:600; line-height:1; color:var(--ink); }
@@ -76,7 +140,7 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); h
 .next-btn { margin-top:auto; background:var(--ink); color:var(--white); border:none; padding:.85rem; font-family:'Unbounded',sans-serif; font-size:.7rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .15s; }
 .next-btn:hover { background:var(--accent); transform:translateY(-1px); }
 
-/* FINAL */
+/* ══ FINAL ══ */
 #final { flex-direction:column; align-items:center; justify-content:center; gap:.5rem; background:var(--bg); }
 .final-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.25em; color:var(--muted); margin-bottom:.5rem; }
 .final-score { font-family:'Unbounded',sans-serif; font-size:clamp(4rem,14vw,9rem); font-weight:600; color:var(--ink); line-height:1; }
@@ -106,25 +170,25 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); h
   <div class="topbar">
     <span class="topbar-logo">Гео<span>Квиз</span></span>
     <span class="topbar-round" id="round-label">Раунд 1 из 5</span>
-    <span class="topbar-score"><span>Очки </span><span id="score-display">0</span></span>
+    <span class="topbar-score"><span class="lbl">Очки </span><span id="score-display">0</span></span>
   </div>
-  <div class="game-body">
-    <div id="panorama">
-      <div id="pano-loading">
-        <div class="loading-dots">
-          <span class="loading-dot"></span>
-          <span class="loading-dot"></span>
-          <span class="loading-dot"></span>
-        </div>
-        <span class="loading-label">Загрузка панорамы</span>
+
+  <div id="panorama">
+    <div id="pano-loading">
+      <div class="loading-dots">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
       </div>
-    </div>
-    <div id="sidebar">
-      <p class="sidebar-hint">Кликни на карту, чтобы поставить метку. Можно двигать её до подтверждения.</p>
-      <div id="map-wrap"><div id="map"></div></div>
-      <button class="guess-btn" id="guess-btn" onclick="submitGuess()">Подтвердить</button>
+      <span class="loading-label">Загрузка панорамы</span>
     </div>
   </div>
+
+  <div id="map-float">
+    <div id="map"></div>
+  </div>
+
+  <button id="guess-btn" onclick="submitGuess()">Подтвердить →</button>
 </div>
 
 <!-- RESULT -->
@@ -210,10 +274,6 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// ── Ключевое исправление: карты создаём ПОСЛЕ show(), внутри setTimeout ──
-// Яндекс.Карты не могут вычислить размеры контейнера если он скрыт (display:none).
-// setTimeout(fn, 100) гарантирует что браузер успел перерисовать DOM.
-
 function initGuessMap(cb) {
   if (G.guessMap) { cb && cb(); return; }
   G.guessMap = new ymaps.Map('map', {
@@ -221,6 +281,15 @@ function initGuessMap(cb) {
   }, { suppressMapOpenBlock:true });
   G.guessMap.cursors.push('pointer');
   G.guessMap.events.add('click', e => placeGuessMarker(e.get('coords')));
+
+  // После hover-расширения пересчитываем viewport карты
+  document.getElementById('map-float').addEventListener('mouseenter', () => {
+    setTimeout(() => G.guessMap && G.guessMap.container.fitToViewport(), 300);
+  });
+  document.getElementById('map-float').addEventListener('mouseleave', () => {
+    setTimeout(() => G.guessMap && G.guessMap.container.fitToViewport(), 300);
+  });
+
   cb && cb();
 }
 
@@ -263,14 +332,11 @@ function startGame() {
     G.round=0; G.totalScore=0; G.roundScores=[];
     G.guessLatLng=null; G.guessMarker=null;
 
-    // Уничтожаем старые карты перед пересозданием
     if(G.guessMap)  { try{ G.guessMap.destroy();  }catch(e){} G.guessMap=null;  }
     if(G.resultMap) { try{ G.resultMap.destroy(); }catch(e){} G.resultMap=null; }
 
     G.order = shuffle(LOCATIONS).slice(0, ROUNDS);
-
     show('game');
-    // 100мс — достаточно чтобы flex-layout отрисовался
     setTimeout(() => initGuessMap(() => loadRound()), 100);
   });
 }
@@ -297,9 +363,7 @@ function loadRound() {
         G.panoPlayer = new ymaps.panorama.Player('panorama', pans[0], {
           controls:[], direction:[Math.random()*360, 0]
         });
-      } else {
-        tryNearby(loc, loading, 0);
-      }
+      } else { tryNearby(loc, loading, 0); }
     },
     function() { loading.style.opacity='0'; loading.style.pointerEvents='none'; }
   );
@@ -310,7 +374,7 @@ function tryNearby(loc, loading, attempt) {
   if(attempt >= offsets.length) {
     loading.style.opacity='0'; loading.style.pointerEvents='none'; return;
   }
-  const [dLat, dLng] = offsets[attempt];
+  const [dLat,dLng] = offsets[attempt];
   ymaps.panorama.locate([loc.lat+dLat, loc.lng+dLng]).done(
     function(pans) {
       if(pans.length > 0) {
