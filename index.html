@@ -7,425 +7,88 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:      #f5f2ec;
-  --surface: #edeae3;
-  --border:  #d8d3c8;
-  --ink:     #1a1a18;
-  --muted:   #8a8680;
-  --accent:  #c8431a;
-  --accent2: #2a6e4a;
-  --white:   #faf8f4;
+  --bg:#f5f2ec; --surface:#edeae3; --border:#d8d3c8;
+  --ink:#1a1a18; --muted:#8a8680; --accent:#c8431a;
+  --accent2:#2a6e4a; --white:#faf8f4;
 }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); height:100vh; overflow:hidden; }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  height: 100vh;
-  overflow: hidden;
-}
+.screen { position:absolute; inset:0; display:none; }
+.screen.active { display:flex; }
 
-/* ── SCREENS ── */
-.screen { position: absolute; inset: 0; display: none; }
-.screen.active { display: flex; }
+/* INTRO */
+#intro { flex-direction:column; align-items:center; justify-content:center; background:var(--bg); }
+.intro-eyebrow { font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem; }
+.intro-title { font-family:'Unbounded',sans-serif; font-size:clamp(2.8rem,7vw,5.5rem); font-weight:600; letter-spacing:-.02em; line-height:1; color:var(--ink); text-align:center; }
+.intro-title span { color:var(--accent); }
+.intro-desc { margin-top:1.5rem; font-size:.9rem; color:var(--muted); text-align:center; max-width:320px; line-height:1.6; }
+.intro-meta { display:flex; gap:2rem; margin-top:2.5rem; margin-bottom:3rem; }
+.meta-item { text-align:center; }
+.meta-item .n { font-family:'Unbounded',sans-serif; font-size:1.6rem; font-weight:600; color:var(--ink); line-height:1; }
+.meta-item .l { font-size:.68rem; text-transform:uppercase; letter-spacing:.15em; color:var(--muted); margin-top:.25rem; }
+.btn { background:var(--ink); color:var(--white); border:none; padding:.9rem 2.8rem; font-family:'Unbounded',sans-serif; font-size:.75rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .15s; }
+.btn:hover { background:var(--accent); transform:translateY(-1px); }
 
-/* ══════════════════════════════════
-   INTRO
-══════════════════════════════════ */
-#intro {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  background: var(--bg);
-}
+/* GAME */
+#game { flex-direction:column; }
+.topbar { height:48px; min-height:48px; background:var(--white); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1.5rem; gap:1.5rem; z-index:10; }
+.topbar-logo { font-family:'Unbounded',sans-serif; font-size:.8rem; font-weight:600; color:var(--ink); }
+.topbar-logo span { color:var(--accent); }
+.topbar-round { font-size:.72rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.topbar-score { margin-left:auto; font-family:'Unbounded',sans-serif; font-size:.85rem; font-weight:600; color:var(--ink); }
+.topbar-score span { font-weight:300; font-size:.7rem; color:var(--muted); margin-right:.3rem; }
+.game-body { flex:1; display:flex; min-height:0; }
+#panorama { flex:1; position:relative; }
+#sidebar { width:300px; min-width:300px; background:var(--white); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:1.25rem; gap:1rem; }
+.sidebar-hint { font-size:.78rem; color:var(--muted); line-height:1.55; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+#map-wrap { flex:1; border:1px solid var(--border); overflow:hidden; min-height:0; }
+#map { width:100%; height:100%; }
+.guess-btn { background:var(--border); color:var(--muted); border:none; padding:.8rem; font-family:'Unbounded',sans-serif; font-size:.7rem; font-weight:300; letter-spacing:.1em; text-transform:uppercase; cursor:not-allowed; transition:background .2s,color .2s,transform .15s; }
+.guess-btn.ready { background:var(--ink); color:var(--white); cursor:pointer; }
+.guess-btn.ready:hover { background:var(--accent); transform:translateY(-1px); }
 
-.intro-eyebrow {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 1.2rem;
-}
+#pano-loading { position:absolute; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:20; transition:opacity .3s; }
+.loading-dots { display:flex; gap:6px; }
+.loading-dot { width:6px; height:6px; background:var(--ink); border-radius:50%; display:inline-block; animation:pulse 1.2s ease-in-out infinite; }
+.loading-dot:nth-child(2){animation-delay:.2s} .loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.loading-label { font-size:.72rem; color:var(--muted); letter-spacing:.15em; text-transform:uppercase; }
 
-.intro-title {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(2.8rem, 7vw, 5.5rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: var(--ink);
-  text-align: center;
-}
+/* RESULT */
+#result { flex-direction:column; }
+.result-topbar { height:48px; min-height:48px; background:var(--white); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1.5rem; gap:1rem; }
+.result-topbar .rt-label { font-family:'Unbounded',sans-serif; font-size:.75rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.result-topbar .rt-loc { font-size:.85rem; color:var(--ink); }
+.result-body { flex:1; display:flex; min-height:0; }
+#result-map-wrap { flex:1; }
+#result-map { width:100%; height:100%; }
+#result-panel { width:300px; min-width:300px; background:var(--white); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:1.5rem; gap:1.5rem; }
+.rp-row { display:flex; flex-direction:column; gap:.3rem; }
+.rp-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.2em; color:var(--muted); }
+.rp-val { font-family:'Unbounded',sans-serif; font-size:2rem; font-weight:600; line-height:1; color:var(--ink); }
+.rp-val .unit { font-size:.9rem; font-weight:300; color:var(--muted); margin-left:.2rem; }
+.rp-pts { color:var(--accent2); }
+.divider { height:1px; background:var(--border); }
+.total-block { background:var(--surface); padding:1rem; display:flex; flex-direction:column; align-items:center; gap:.25rem; }
+.total-block .big { font-family:'Unbounded',sans-serif; font-size:2.2rem; font-weight:600; color:var(--ink); line-height:1; }
+.total-block .lbl { font-size:.65rem; text-transform:uppercase; letter-spacing:.18em; color:var(--muted); }
+.next-btn { margin-top:auto; background:var(--ink); color:var(--white); border:none; padding:.85rem; font-family:'Unbounded',sans-serif; font-size:.7rem; font-weight:300; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .15s; }
+.next-btn:hover { background:var(--accent); transform:translateY(-1px); }
 
-.intro-title span {
-  color: var(--accent);
-}
-
-.intro-desc {
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  color: var(--muted);
-  text-align: center;
-  max-width: 320px;
-  line-height: 1.6;
-}
-
-.intro-meta {
-  display: flex;
-  gap: 2rem;
-  margin-top: 2.5rem;
-  margin-bottom: 3rem;
-}
-
-.meta-item {
-  text-align: center;
-}
-
-.meta-item .n {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.meta-item .l {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-
-.btn {
-  background: var(--ink);
-  color: var(--white);
-  border: none;
-  padding: 0.9rem 2.8rem;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-}
-.btn:hover { background: var(--accent); transform: translateY(-1px); }
-
-/* ══════════════════════════════════
-   GAME SCREEN
-══════════════════════════════════ */
-#game { flex-direction: column; }
-
-/* top bar */
-.topbar {
-  height: 48px;
-  min-height: 48px;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  gap: 1.5rem;
-  z-index: 10;
-}
-
-.topbar-logo {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.topbar-logo span { color: var(--accent); }
-
-.topbar-round {
-  font-size: 0.72rem;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.topbar-score {
-  margin-left: auto;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.topbar-score span {
-  font-weight: 300;
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-right: 0.3rem;
-}
-
-/* main area */
-.game-body {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-
-#panorama {
-  flex: 1;
-  position: relative;
-}
-
-/* sidebar */
-#sidebar {
-  width: 300px;
-  min-width: 300px;
-  background: var(--white);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 1.25rem;
-  gap: 1rem;
-}
-
-.sidebar-hint {
-  font-size: 0.78rem;
-  color: var(--muted);
-  line-height: 1.55;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-#map-wrap {
-  flex: 1;
-  border: 1px solid var(--border);
-  overflow: hidden;
-  min-height: 0;
-}
-
-#map { width: 100%; height: 100%; }
-
-.guess-btn {
-  background: var(--border);
-  color: var(--muted);
-  border: none;
-  padding: 0.8rem;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: not-allowed;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
-}
-.guess-btn.ready {
-  background: var(--ink);
-  color: var(--white);
-  cursor: pointer;
-}
-.guess-btn.ready:hover { background: var(--accent); transform: translateY(-1px); }
-
-/* loading */
-#pano-loading {
-  position: absolute;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  z-index: 20;
-  transition: opacity 0.3s;
-}
-
-.loading-dot {
-  width: 6px; height: 6px;
-  background: var(--ink);
-  border-radius: 50%;
-  display: inline-block;
-  animation: pulse 1.2s ease-in-out infinite;
-}
-.loading-dot:nth-child(2) { animation-delay: 0.2s; }
-.loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
-
-.loading-dots { display: flex; gap: 6px; }
-.loading-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
-
-/* ══════════════════════════════════
-   RESULT SCREEN
-══════════════════════════════════ */
-#result { flex-direction: column; }
-
-.result-topbar {
-  height: 48px;
-  min-height: 48px;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  gap: 1rem;
-}
-
-.result-topbar .rt-label {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.result-topbar .rt-loc {
-  font-size: 0.85rem;
-  color: var(--ink);
-  font-weight: 400;
-}
-
-.result-body { flex: 1; display: flex; min-height: 0; }
-
-#result-map-wrap { flex: 1; }
-#result-map { width: 100%; height: 100%; }
-
-#result-panel {
-  width: 300px;
-  min-width: 300px;
-  background: var(--white);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem;
-  gap: 1.5rem;
-}
-
-.rp-row { display: flex; flex-direction: column; gap: 0.3rem; }
-.rp-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-}
-.rp-val {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--ink);
-}
-.rp-val .unit {
-  font-size: 0.9rem;
-  font-weight: 300;
-  color: var(--muted);
-  margin-left: 0.2rem;
-}
-.rp-pts { color: var(--accent2); }
-
-.divider { height: 1px; background: var(--border); }
-
-.total-block {
-  background: var(--surface);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.total-block .big {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.total-block .lbl {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--muted);
-}
-
-.next-btn {
-  margin-top: auto;
-  background: var(--ink);
-  color: var(--white);
-  border: none;
-  padding: 0.85rem;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-}
-.next-btn:hover { background: var(--accent); transform: translateY(-1px); }
-
-/* ══════════════════════════════════
-   FINAL SCREEN
-══════════════════════════════════ */
-#final {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--bg);
-}
-
-.final-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
-}
-
-.final-score {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(4rem, 14vw, 9rem);
-  font-weight: 600;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.final-rank {
-  font-size: 1rem;
-  color: var(--accent);
-  margin-top: 0.5rem;
-  font-weight: 400;
-}
-
-.final-rounds {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: 1.5rem;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 380px;
-}
-
-.fr-chip {
-  background: var(--white);
-  border: 1px solid var(--border);
-  padding: 0.4rem 0.9rem;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-.fr-chip b { color: var(--ink); font-weight: 600; }
+/* FINAL */
+#final { flex-direction:column; align-items:center; justify-content:center; gap:.5rem; background:var(--bg); }
+.final-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.25em; color:var(--muted); margin-bottom:.5rem; }
+.final-score { font-family:'Unbounded',sans-serif; font-size:clamp(4rem,14vw,9rem); font-weight:600; color:var(--ink); line-height:1; }
+.final-rank { font-size:1rem; color:var(--accent); margin-top:.5rem; }
+.final-rounds { display:flex; gap:.4rem; margin-top:1.5rem; margin-bottom:2.5rem; flex-wrap:wrap; justify-content:center; max-width:380px; }
+.fr-chip { background:var(--white); border:1px solid var(--border); padding:.4rem .9rem; font-size:.78rem; color:var(--muted); }
+.fr-chip b { color:var(--ink); font-weight:600; }
 </style>
 </head>
 <body>
 
-<!-- ═══════ INTRO ═══════ -->
+<!-- INTRO -->
 <div id="intro" class="screen active">
   <p class="intro-eyebrow">Угадай место</p>
   <h1 class="intro-title">Гео<span>Квиз</span></h1>
@@ -438,12 +101,12 @@ body {
   <button class="btn" onclick="startGame()">Начать</button>
 </div>
 
-<!-- ═══════ GAME ═══════ -->
+<!-- GAME -->
 <div id="game" class="screen">
   <div class="topbar">
     <span class="topbar-logo">Гео<span>Квиз</span></span>
     <span class="topbar-round" id="round-label">Раунд 1 из 5</span>
-    <span class="topbar-score"><span>Очки</span><span id="score-display">0</span></span>
+    <span class="topbar-score"><span>Очки </span><span id="score-display">0</span></span>
   </div>
   <div class="game-body">
     <div id="panorama">
@@ -457,14 +120,14 @@ body {
       </div>
     </div>
     <div id="sidebar">
-      <p class="sidebar-hint">Кликни на карту, чтобы поставить метку. Можно перемещать её до подтверждения.</p>
+      <p class="sidebar-hint">Кликни на карту, чтобы поставить метку. Можно двигать её до подтверждения.</p>
       <div id="map-wrap"><div id="map"></div></div>
       <button class="guess-btn" id="guess-btn" onclick="submitGuess()">Подтвердить</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════ RESULT ═══════ -->
+<!-- RESULT -->
 <div id="result" class="screen">
   <div class="result-topbar">
     <span class="rt-label">Результат —</span>
@@ -491,7 +154,7 @@ body {
   </div>
 </div>
 
-<!-- ═══════ FINAL ═══════ -->
+<!-- FINAL -->
 <div id="final" class="screen">
   <p class="final-label">Игра завершена</p>
   <div class="final-score" id="final-score">0</div>
@@ -500,46 +163,46 @@ body {
   <button class="btn" onclick="resetGame()">Играть снова</button>
 </div>
 
+<!-- ⚠️ Замените YOUR_API_KEY на ваш ключ с developer.tech.yandex.ru -->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=YOUR_API_KEY&lang=ru_RU" type="text/javascript"></script>
+
 <script>
-// ════════════════════════════════════════
-//  РОССИЙСКИЕ ЛОКАЦИИ — только города РФ
-// ════════════════════════════════════════
 const LOCATIONS = [
-  { lat: 55.7558, lng: 37.6173, name: "Москва" },
-  { lat: 59.9343, lng: 30.3351, name: "Санкт-Петербург" },
-  { lat: 56.8519, lng: 60.6122, name: "Екатеринбург" },
-  { lat: 55.0084, lng: 82.9357, name: "Новосибирск" },
-  { lat: 56.4977, lng: 84.9744, name: "Томск" },
-  { lat: 57.1522, lng: 65.5272, name: "Тюмень" },
-  { lat: 53.1959, lng: 50.1008, name: "Самара" },
-  { lat: 56.3269, lng: 44.0059, name: "Нижний Новгород" },
-  { lat: 56.6344, lng: 47.8963, name: "Йошкар-Ола" },
-  { lat: 43.1332, lng: 131.9113,name: "Владивосток" },
-  { lat: 56.0153, lng: 92.8932, name: "Красноярск" },
-  { lat: 51.5406, lng: 46.0086, name: "Саратов" },
-  { lat: 54.7388, lng: 55.9721, name: "Уфа" },
-  { lat: 55.7879, lng: 49.1233, name: "Казань" },
-  { lat: 58.0105, lng: 56.2502, name: "Пермь" },
-  { lat: 48.7080, lng: 44.5133, name: "Волгоград" },
-  { lat: 61.7849, lng: 34.3469, name: "Петрозаводск" },
-  { lat: 68.9585, lng: 33.0827, name: "Мурманск" },
-  { lat: 51.6609, lng: 39.2006, name: "Воронеж" },
-  { lat: 52.2978, lng: 104.2964,name: "Иркутск" },
-  { lat: 56.7985, lng: 60.6039, name: "Екатеринбург (центр)" },
-  { lat: 47.2224, lng: 39.7188, name: "Ростов-на-Дону" },
-  { lat: 45.0360, lng: 38.9751, name: "Краснодар" },
-  { lat: 44.6098, lng: 33.5254, name: "Севастополь" },
-  { lat: 43.5855, lng: 39.7231, name: "Сочи" },
+  { lat:55.7558, lng:37.6173, name:"Москва" },
+  { lat:59.9343, lng:30.3351, name:"Санкт-Петербург" },
+  { lat:56.8519, lng:60.6122, name:"Екатеринбург" },
+  { lat:55.0084, lng:82.9357, name:"Новосибирск" },
+  { lat:56.4977, lng:84.9744, name:"Томск" },
+  { lat:57.1522, lng:65.5272, name:"Тюмень" },
+  { lat:53.1959, lng:50.1008, name:"Самара" },
+  { lat:56.3269, lng:44.0059, name:"Нижний Новгород" },
+  { lat:43.1332, lng:131.9113,name:"Владивосток" },
+  { lat:56.0153, lng:92.8932, name:"Красноярск" },
+  { lat:51.5406, lng:46.0086, name:"Саратов" },
+  { lat:54.7388, lng:55.9721, name:"Уфа" },
+  { lat:55.7879, lng:49.1233, name:"Казань" },
+  { lat:58.0105, lng:56.2502, name:"Пермь" },
+  { lat:48.7080, lng:44.5133, name:"Волгоград" },
+  { lat:61.7849, lng:34.3469, name:"Петрозаводск" },
+  { lat:68.9585, lng:33.0827, name:"Мурманск" },
+  { lat:51.6609, lng:39.2006, name:"Воронеж" },
+  { lat:52.2978, lng:104.2964,name:"Иркутск" },
+  { lat:47.2224, lng:39.7188, name:"Ростов-на-Дону" },
+  { lat:45.0360, lng:38.9751, name:"Краснодар" },
+  { lat:43.5855, lng:39.7231, name:"Сочи" },
+  { lat:56.6344, lng:47.8963, name:"Йошкар-Ола" },
+  { lat:54.9884, lng:73.3682, name:"Омск" },
+  { lat:61.6688, lng:50.8362, name:"Сыктывкар" },
 ];
 
 const ROUNDS = 5;
 const MAX_SCORE = 5000;
 
 let G = {
-  round: 0, totalScore: 0, roundScores: [],
-  order: [], guessLatLng: null,
-  guessMarker: null, guessMap: null,
-  resultMap: null, panoPlayer: null,
+  round:0, totalScore:0, roundScores:[],
+  order:[], guessLatLng:null,
+  guessMarker:null, guessMap:null,
+  resultMap:null, panoPlayer:null,
 };
 
 function show(id) {
@@ -547,119 +210,122 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 
+// ── Ключевое исправление: карты создаём ПОСЛЕ show(), внутри setTimeout ──
+// Яндекс.Карты не могут вычислить размеры контейнера если он скрыт (display:none).
+// setTimeout(fn, 100) гарантирует что браузер успел перерисовать DOM.
+
+function initGuessMap(cb) {
+  if (G.guessMap) { cb && cb(); return; }
+  G.guessMap = new ymaps.Map('map', {
+    center:[62, 95], zoom:3, controls:['zoomControl']
+  }, { suppressMapOpenBlock:true });
+  G.guessMap.cursors.push('pointer');
+  G.guessMap.events.add('click', e => placeGuessMarker(e.get('coords')));
+  cb && cb();
+}
+
+function initResultMap(cb) {
+  if (G.resultMap) { cb && cb(); return; }
+  G.resultMap = new ymaps.Map('result-map', {
+    center:[62, 95], zoom:3, controls:['zoomControl']
+  }, { suppressMapOpenBlock:true });
+  cb && cb();
+}
+
 function shuffle(arr) {
   const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  for(let i=a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
   }
   return a;
 }
 
 function haversineKm(a, b) {
-  const R = 6371, toRad = x => x * Math.PI / 180;
-  const dLat = toRad(b[0] - a[0]), dLng = toRad(b[1] - a[1]);
-  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng/2)**2;
+  const R=6371, r=x=>x*Math.PI/180;
+  const dLat=r(b[0]-a[0]), dLng=r(b[1]-a[1]);
+  const s = Math.sin(dLat/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLng/2)**2;
   return R * 2 * Math.asin(Math.sqrt(s));
 }
 
-function calcScore(km) {
-  return Math.round(MAX_SCORE * Math.exp(-km / 1500));
-}
-
-// ── Init Yandex Maps ──
-ymaps.ready(() => {
-  // Guess map
-  G.guessMap = new ymaps.Map('map', {
-    center: [62, 95], zoom: 3,
-    controls: ['zoomControl'],
-  }, { suppressMapOpenBlock: true });
-
-  G.guessMap.cursors.push('pointer');
-
-  G.guessMap.events.add('click', e => {
-    const coords = e.get('coords');
-    placeGuessMarker(coords);
-  });
-
-  // Result map
-  G.resultMap = new ymaps.Map('result-map', {
-    center: [62, 95], zoom: 3,
-    controls: ['zoomControl'],
-  }, { suppressMapOpenBlock: true });
-});
+function calcScore(km) { return Math.round(MAX_SCORE * Math.exp(-km/1500)); }
 
 function placeGuessMarker(coords) {
-  if (G.guessMarker) G.guessMap.geoObjects.remove(G.guessMarker);
-  G.guessMarker = new ymaps.Placemark(coords, {}, {
-    preset: 'islands#redCircleDotIcon',
-  });
+  if(G.guessMarker) G.guessMap.geoObjects.remove(G.guessMarker);
+  G.guessMarker = new ymaps.Placemark(coords, {}, { preset:'islands#redCircleDotIcon' });
   G.guessMap.geoObjects.add(G.guessMarker);
   G.guessLatLng = coords;
-  const btn = document.getElementById('guess-btn');
-  btn.classList.add('ready');
+  document.getElementById('guess-btn').classList.add('ready');
 }
 
 function startGame() {
-  G.round = 0; G.totalScore = 0; G.roundScores = [];
-  G.order = shuffle(LOCATIONS).slice(0, ROUNDS);
-  show('game');
-  loadRound();
+  ymaps.ready(() => {
+    G.round=0; G.totalScore=0; G.roundScores=[];
+    G.guessLatLng=null; G.guessMarker=null;
+
+    // Уничтожаем старые карты перед пересозданием
+    if(G.guessMap)  { try{ G.guessMap.destroy();  }catch(e){} G.guessMap=null;  }
+    if(G.resultMap) { try{ G.resultMap.destroy(); }catch(e){} G.resultMap=null; }
+
+    G.order = shuffle(LOCATIONS).slice(0, ROUNDS);
+
+    show('game');
+    // 100мс — достаточно чтобы flex-layout отрисовался
+    setTimeout(() => initGuessMap(() => loadRound()), 100);
+  });
 }
 
 function loadRound() {
   const loc = G.order[G.round];
-  document.getElementById('round-label').textContent = `Раунд ${G.round + 1} из ${ROUNDS}`;
+  document.getElementById('round-label').textContent = `Раунд ${G.round+1} из ${ROUNDS}`;
   document.getElementById('score-display').textContent = G.totalScore;
 
-  // Reset
   G.guessLatLng = null;
-  if (G.guessMarker) { G.guessMap.geoObjects.remove(G.guessMarker); G.guessMarker = null; }
+  if(G.guessMarker) { G.guessMap.geoObjects.remove(G.guessMarker); G.guessMarker=null; }
   document.getElementById('guess-btn').classList.remove('ready');
+  G.guessMap.setCenter([62,95]); G.guessMap.setZoom(3);
 
-  // Show loading
   const loading = document.getElementById('pano-loading');
-  loading.style.opacity = '1';
-  loading.style.pointerEvents = 'all';
+  loading.style.opacity='1'; loading.style.pointerEvents='all';
 
-  // Destroy old player
-  if (G.panoPlayer) { try { G.panoPlayer.destroy(); } catch(e){} G.panoPlayer = null; }
+  if(G.panoPlayer) { try{ G.panoPlayer.destroy(); }catch(e){} G.panoPlayer=null; }
 
-  // Find panorama near location
-  ymaps.panorama.locate([loc.lat, loc.lng], { layer: 'yandex#panorama' }).done(
-    function(panoramas) {
-      loading.style.opacity = '0';
-      loading.style.pointerEvents = 'none';
-
-      if (panoramas.length > 0) {
-        G.panoPlayer = new ymaps.panorama.Player('panorama', panoramas[0], {
-          controls: [],
-          direction: [Math.random() * 360, 0],
+  ymaps.panorama.locate([loc.lat, loc.lng], { layer:'yandex#panorama' }).done(
+    function(pans) {
+      loading.style.opacity='0'; loading.style.pointerEvents='none';
+      if(pans.length > 0) {
+        G.panoPlayer = new ymaps.panorama.Player('panorama', pans[0], {
+          controls:[], direction:[Math.random()*360, 0]
         });
       } else {
-        // Try offset
-        ymaps.panorama.locate([loc.lat + 0.003, loc.lng + 0.003]).done(
-          function(pans2) {
-            if (pans2.length > 0) {
-              G.panoPlayer = new ymaps.panorama.Player('panorama', pans2[0], {
-                controls: [],
-                direction: [Math.random() * 360, 0],
-              });
-            }
-          },
-          function() {}
-        );
+        tryNearby(loc, loading, 0);
       }
     },
-    function() {
-      loading.style.opacity = '0';
-      loading.style.pointerEvents = 'none';
-    }
+    function() { loading.style.opacity='0'; loading.style.pointerEvents='none'; }
+  );
+}
+
+function tryNearby(loc, loading, attempt) {
+  const offsets = [[0.005,0],[0,-0.005],[0.005,0.005],[-0.005,0],[0,0.005],[-0.005,-0.005]];
+  if(attempt >= offsets.length) {
+    loading.style.opacity='0'; loading.style.pointerEvents='none'; return;
+  }
+  const [dLat, dLng] = offsets[attempt];
+  ymaps.panorama.locate([loc.lat+dLat, loc.lng+dLng]).done(
+    function(pans) {
+      if(pans.length > 0) {
+        loading.style.opacity='0'; loading.style.pointerEvents='none';
+        G.panoPlayer = new ymaps.panorama.Player('panorama', pans[0], {
+          controls:[], direction:[Math.random()*360, 0]
+        });
+      } else { tryNearby(loc, loading, attempt+1); }
+    },
+    function() { tryNearby(loc, loading, attempt+1); }
   );
 }
 
 function submitGuess() {
-  if (!G.guessLatLng) return;
+  if(!G.guessLatLng) return;
 
   const target = G.order[G.round];
   const dist = haversineKm([target.lat, target.lng], G.guessLatLng);
@@ -667,92 +333,64 @@ function submitGuess() {
   G.totalScore += pts;
   G.roundScores.push(pts);
 
-  // Result display
   document.getElementById('result-loc-name').textContent = target.name;
-  if (dist < 1) {
-    document.getElementById('result-dist').innerHTML = `${(dist*1000).toFixed(0)}<span class="unit">м</span>`;
-  } else {
-    document.getElementById('result-dist').innerHTML = `${dist.toFixed(0)}<span class="unit">км</span>`;
-  }
+  document.getElementById('result-dist').innerHTML = dist < 1
+    ? `${(dist*1000).toFixed(0)}<span class="unit">м</span>`
+    : `${dist.toFixed(0)}<span class="unit">км</span>`;
   document.getElementById('result-pts').textContent = pts;
   document.getElementById('result-total').textContent = G.totalScore;
   document.getElementById('next-btn').textContent =
-    G.round + 1 >= ROUNDS ? 'Финал →' : 'Следующий раунд →';
-
-  // Rebuild result map (clear old objects)
-  G.resultMap.geoObjects.removeAll();
-  G.resultMap.setCenter([62, 95]); G.resultMap.setZoom(3);
-
-  // Target pin
-  const targetPin = new ymaps.Placemark([target.lat, target.lng], {
-    balloonContent: target.name
-  }, {
-    preset: 'islands#greenCircleDotIcon',
-  });
-
-  // Guess pin
-  const guessPin = new ymaps.Placemark(G.guessLatLng, {
-    balloonContent: 'Ваша метка'
-  }, {
-    preset: 'islands#redCircleDotIcon',
-  });
-
-  // Line
-  const line = new ymaps.Polyline(
-    [[target.lat, target.lng], G.guessLatLng],
-    {},
-    { strokeColor: '#c8431a', strokeWidth: 2, strokeStyle: 'dash' }
-  );
-
-  G.resultMap.geoObjects.add(targetPin);
-  G.resultMap.geoObjects.add(guessPin);
-  G.resultMap.geoObjects.add(line);
-
-  // Fit bounds
-  const bounds = G.resultMap.geoObjects.getBounds();
-  if (bounds) G.resultMap.setBounds(bounds, { checkZoomRange: true, margin: 80 });
+    G.round+1 >= ROUNDS ? 'Финал →' : 'Следующий раунд →';
 
   show('result');
+  setTimeout(() => {
+    initResultMap(() => {
+      G.resultMap.geoObjects.removeAll();
+      G.resultMap.setCenter([62,95]); G.resultMap.setZoom(3);
+
+      G.resultMap.geoObjects.add(new ymaps.Placemark(
+        [target.lat, target.lng], { balloonContent: target.name },
+        { preset:'islands#greenCircleDotIcon' }
+      ));
+      G.resultMap.geoObjects.add(new ymaps.Placemark(
+        G.guessLatLng, { balloonContent:'Ваша метка' },
+        { preset:'islands#redCircleDotIcon' }
+      ));
+      G.resultMap.geoObjects.add(new ymaps.Polyline(
+        [[target.lat, target.lng], G.guessLatLng], {},
+        { strokeColor:'#c8431a', strokeWidth:2, strokeStyle:'dash' }
+      ));
+
+      const bounds = G.resultMap.geoObjects.getBounds();
+      if(bounds) G.resultMap.setBounds(bounds, { checkZoomRange:true, margin:80 });
+    });
+  }, 100);
 }
 
 function nextRound() {
   G.round++;
-  if (G.round >= ROUNDS) {
-    showFinal();
-  } else {
-    show('game');
-    loadRound();
-  }
+  if(G.round >= ROUNDS) { showFinal(); return; }
+  show('game');
+  setTimeout(() => loadRound(), 50);
 }
 
 function showFinal() {
   document.getElementById('final-score').textContent = G.totalScore;
-
-  let rank;
-  if      (G.totalScore >= 22000) rank = 'Знаток России';
-  else if (G.totalScore >= 16000) rank = 'Опытный путешественник';
-  else if (G.totalScore >= 10000) rank = 'Любитель карт';
-  else if (G.totalScore >= 5000)  rank = 'Начинающий';
-  else                            rank = 'Стоит потренироваться';
-  document.getElementById('final-rank').textContent = rank;
-
-  const el = document.getElementById('final-rounds');
-  el.innerHTML = G.roundScores.map((s, i) =>
-    `<div class="fr-chip">${i+1}. <b>${s}</b> очков</div>`
-  ).join('');
-
+  const ranks = [
+    [22000,'Знаток России'],
+    [16000,'Опытный путешественник'],
+    [10000,'Любитель карт'],
+    [5000,'Начинающий'],
+    [0,'Стоит потренироваться'],
+  ];
+  document.getElementById('final-rank').textContent = ranks.find(([t]) => G.totalScore >= t)[1];
+  document.getElementById('final-rounds').innerHTML = G.roundScores
+    .map((s,i) => `<div class="fr-chip">${i+1}. <b>${s}</b> очков</div>`)
+    .join('');
   show('final');
 }
 
 function resetGame() { startGame(); }
 </script>
-
-<!-- 
-  ⚠️  Замените YOUR_API_KEY на ваш ключ Яндекс.Карт
-  Получить: https://developer.tech.yandex.ru
-  Нужен: JavaScript API и HTTP Геокодер
--->
-<script src="https://api-maps.yandex.ru/2.1/?apikey=765c4d98-e15d-4b36-bbc7-394514d2cb14&lang=ru_RU" type="text/javascript"></script>
-
 </body>
 </html>
